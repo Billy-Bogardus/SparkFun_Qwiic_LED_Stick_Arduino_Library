@@ -22,36 +22,30 @@ class Qwiic_LED_Stick:
             from smbus import SMBus
             self.bus = SMBus(bussAddr)
         except:
-            print("smbus not available")
+            print("smbus not available. Please make sure this Module is installed.")
 
     #Write LED Color(s)
     def setLEDColor(self, red, green, blue, number=0):
         #set colors of LED's to individual Colors
         if(type(red)  is list and type(green) is list and type(blue) is list):
-            print("Independent")
             #write Red
-            #TODO This function does not imitate the original Progrogram
             self.WriteColorArray(self.COMMAND_WRITE_RED_ARRAY,red)
-            #print("g")
-            ##Write Green
+            #Write Green
             self.WriteColorArray(self.COMMAND_WRITE_GREEN_ARRAY,green)
-            #print("b")
-            ##Write Blue
+            #Write Blue
             self.WriteColorArray( self.COMMAND_WRITE_BLUE_ARRAY,blue)
         #all LEDs the same color
         elif(type(red)  is int and type(green) is int and type(blue) is int and number == 0):
             data = [red, green, blue]
-            print(data)
             self.bus.write_i2c_block_data(self.LED_Stick_Address, self.COMMAND_WRITE_ALL_LED_COLOR, data)
         #set color of individual LED
         elif(type(red)  is int and type(green) is int and type(blue) is int and type(number) is int ):
             data = [number, red, green, blue]
-            print(data)
             self.bus.write_i2c_block_data(self.LED_Stick_Address, self.COMMAND_WRITE_SINGLE_LED_COLOR, data)
         else:
             print("Bad Arguments")
 
-    #Simple Blink Code
+    #Simple Blink Code with adjustable on and off delay
     def blink(self, timeA = 0.5, timeB = 0.5):
         while(1):
             self.setLEDColor(0,0,0)
@@ -87,7 +81,7 @@ class Qwiic_LED_Stick:
         for n in chunkRange :
             sliver = slice(n*12,n*12+11)
             data = [12, n*12] + array[sliver] + [12]
-            print("12 - "+str(data) )
+            
             self.bus.write_i2c_block_data(self.LED_Stick_Address, command, data)
             n = length // 12
             b = 1
@@ -96,7 +90,7 @@ class Qwiic_LED_Stick:
         if ( arrLen > 0 ):
             sliver = slice(n*12-1*b,len(array))
             data = [arrLen, n*12] + array[sliver] + [arrLen]
-            print(" > 0 "+str(data) )
+            
             self.bus.write_i2c_block_data(self.LED_Stick_Address, command, data)
     
     #arrays for use latter
@@ -127,9 +121,3 @@ class Qwiic_LED_Stick:
 bling = Qwiic_LED_Stick(1)
 #bling.blink()
 bling.blinkRainbow()
-
-#blinkRainbow()
-
-#allOn()
-
-#blink()
