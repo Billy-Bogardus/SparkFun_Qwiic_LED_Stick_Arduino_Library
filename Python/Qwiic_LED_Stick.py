@@ -101,22 +101,22 @@ class Qwiic_LED_Stick:
     
     #arrays for use latter
     def holdgarbage(self):
-            setLEDColor(
+            self.setLEDColor(
                 [  0, 30,  0],
                 [  0,  0, 30],
                 [ 30,  0,  0])
-            setLEDColor(
+            self.setLEDColor(
                 [  0, 30,  0, 10, 30, 40, 30,  0,  0, 30, 10, 30,  3],
                 [  0,  0, 30,  0,  0, 30, 30,  0,  0, 30, 10, 30,  3],
                 [ 30,  0,  0, 30, 10, 30, 30,  0,  0, 30, 10, 30,  3])
                 #  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 12, 13, 14
-            setLEDColor(
+            self.setLEDColor(
                 [0] *10,
                 range(0,30,3),
                 [0]* 10)
                 #  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 12, 13, 14
             time.sleep(0.5)
-            setLEDColor(
+            self.setLEDColor(
                 [0] *10,
                 [0]* 10,
                 range(0,30,3))
