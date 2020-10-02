@@ -63,10 +63,13 @@ class Qwiic_LED_Stick:
         if(type(red)  is list and type(green) is list and type(blue) is list):
             #write Red
             self.WriteColorArray(self.COMMAND_WRITE_RED_ARRAY,red)
+            time.sleep(0.001)#added delay because we were overwelming the chip
             #Write Green
             self.WriteColorArray(self.COMMAND_WRITE_GREEN_ARRAY,green)
+            time.sleep(0.001)
             #Write Blue
             self.WriteColorArray( self.COMMAND_WRITE_BLUE_ARRAY,blue)
+            time.sleep(0.001)
         #all LEDs the same color
         elif(type(red)  is int and type(green) is int and type(blue) is int and number == 0):
             data = [red, green, blue]
@@ -88,8 +91,10 @@ class Qwiic_LED_Stick:
     #Write a Collor array
     def WriteColorArray(self, command, array):
         length = len(array)+1
+        #ATtiny has a 16 uint8_t limit on a single I2C transmission,
+        #so multiple calls to commands are required
         n=0
-        arrLen = (length) % 12
+        arrLen = (length) % 12 #value for remainder of division length/12
         chunkRange = range( length // 12)
         for n in chunkRange :
             sliver = slice(n*12,n*12+11)
@@ -102,8 +107,9 @@ class Qwiic_LED_Stick:
             b=0
         if ( arrLen > 0 ):
             sliver = slice(n*12-1*b,len(array))
-            data = [arrLen, n*12] + array[sliver] + [arrLen]
-            
+            #print(sliver)
+            data = [arrLen -1, n*12] + array[sliver]
+            #print(hex(command) + " " + str(data))
             self.bus.write_i2c_block_data(self.LED_Stick_Address, command, data)
 
     #Listen to keyboard 
@@ -180,12 +186,13 @@ class Qwiic_LED_Blink_File(Qwiic_LED_Stick):
         B_list = []
         _thread.start_new_thread(self.monitorFile, (filename, B_list,))
         while not B_list:
-            self.setLEDColor(0,0,0,0)
+            #self.setLEDColor(0,0,0,0)
+            self.allOff()
             #       1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 12, 13, 14
-            rr = [  0,  0,  0,148, 75,  0,  0,255,255,255,  0]
-            rb = [  0,  0,  0,  0,  0,  0,255,255,165, 10,  0]
-            rg = [  0,  0,  0,211,130,255,  0,  0,  0,  0,  0]
             time.sleep(timeA)
+            rr = [148, 75,  0,  0,255,255,255,148, 75,  0]
+            rb = [  0,  0,  0,255,255,165, 10,  0,  0,  0]
+            rg = [211,130,255,  0,  0,  0,  0,211,130,255]
             self.setLEDColor(rr,rb,rg)
             time.sleep(timeB)
     #This function will be launched in a different thread and will monitor the specified file for a value of False
@@ -203,6 +210,21 @@ class Qwiic_LED_Blink_File(Qwiic_LED_Stick):
         f = open(filename, "wt")
         f.write("True")
         f.close()
+    def testWriteArray(self):
+        command = self.COMMAND_WRITE_BLUE_ARRAY
+        array = [100,100,100,100,100,100,100,100,100,100]
+        self.WriteColorArray(command, array)
+        time.sleep(1)
+        self.allOff()
+        command = self.COMMAND_WRITE_RED_ARRAY
+        array = [100,100,100,100,100,100,100,100,100,100]
+        self.WriteColorArray(command, array)
+        time.sleep(1)
+        self.allOff()
+        command = self.COMMAND_WRITE_GREEN_ARRAY
+        array = [100,100,100,100,100,100,100,100,100,100]
+        self.WriteColorArray(command, array)
+        time.sleep(1)
 
 # Test File based Loop
 if __name__ == '__main__':
@@ -213,15 +235,15 @@ if __name__ == '__main__':
     #set brightness to 1 I like my eyeballs
     bling.setLEDBrightness(1)
     #blink LED
-    bling.changeLength(10)
+    bling.testWriteArray()
     bling.resetFile("Python/text")
-    bling.blink()
+    bling.blinkRainbow()
     #bling.allOn()
     #time.sleep(0.5)
     #bling.allOff()
     #time.sleep(0.5)
     #blink Rainbow
     bling.resetFile("Python/text")
-    bling.blinkRainbow()
+    bling.blink()
     bling.resetFile("Python/text")
     bling.allOff()
